@@ -1,0 +1,56 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/title" android:textSize="28sp" android:textStyle="bold" android:textColor="#15334D" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/subtitle" android:textSize="18sp" android:layout_marginBottom="12dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/scope" />
+        <Button android:id="@+id/refresh" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/refresh" />
+        <TextView android:id="@+id/deviceStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textIsSelectable="true" />
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp"
+            android:text="@string/camera_title" android:textSize="22sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/camera_help" />
+        <Spinner android:id="@+id/cameraPicker" android:layout_width="match_parent" android:layout_height="56dp" />
+        <LinearLayout style="?android:attr/buttonBarStyle" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <Button style="?android:attr/buttonBarButtonStyle" android:id="@+id/openCamera" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/open_camera" />
+            <Button style="?android:attr/buttonBarButtonStyle" android:id="@+id/closeCamera" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/close_camera" />
+        </LinearLayout>
+        <TextureView android:id="@+id/preview" android:layout_width="match_parent" android:layout_height="250dp" />
+        <TextView android:id="@+id/cameraStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textIsSelectable="true" />
+        <Button android:id="@+id/capture" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/capture" android:enabled="false" />
+        <ImageView android:id="@+id/photo" android:layout_width="match_parent" android:layout_height="200dp"
+            android:scaleType="fitCenter" android:visibility="gone" android:contentDescription="@string/photo_description" />
+        <CheckBox android:id="@+id/confirmGlasses" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/confirm_glasses" android:enabled="false" />
+        <Button android:id="@+id/sharePhoto" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/share_photo" android:enabled="false" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/share_help" />
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp"
+            android:text="@string/audio_title" android:textSize="22sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/audio_help" />
+        <TextView android:id="@+id/audioStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textIsSelectable="true" />
+        <Spinner android:id="@+id/audioPicker" android:layout_width="match_parent" android:layout_height="56dp" />
+        <Button android:id="@+id/audioTest" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/audio_test" />
+        <Button android:id="@+id/audioStop" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/audio_stop" />
+        <Button android:id="@+id/bluetoothSettings" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/bluetooth_settings" />
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp"
+            android:text="@string/wifi_title" android:textSize="22sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/wifi_help" />
+        <EditText android:id="@+id/host" android:layout_width="match_parent" android:layout_height="56dp"
+            android:hint="@string/host_hint" android:inputType="textUri" android:singleLine="true" android:importantForAutofill="no" />
+        <Button android:id="@+id/wifiTest" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/wifi_test" />
+        <TextView android:id="@+id/wifiStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textIsSelectable="true" />
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp"
+            android:text="@string/button_title" android:textSize="22sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/button_help" />
+        <TextView android:id="@+id/keyStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textIsSelectable="true" />
+        <Button android:id="@+id/shareReport" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/share_report" android:layout_marginTop="24dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/report_help" />
+    </LinearLayout>
+</ScrollView>

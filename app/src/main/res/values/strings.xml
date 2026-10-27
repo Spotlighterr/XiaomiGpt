@@ -1,0 +1,28 @@
+<resources>
+    <string name="title">XiaomiGpt</string>
+    <string name="subtitle">Kiểm tra kết nối camera và âm thanh</string>
+    <string name="scope">Bản thử nghiệm cho M2442G1 • firmware 1.8.12.0\nChưa kết nối ChatGPT. Hãy dùng bản này để kiểm tra đường ảnh và micro trên điện thoại.</string>
+    <string name="refresh">Cấp quyền và làm mới</string>
+    <string name="camera_title">1. Camera</string>
+    <string name="camera_help">Chọn camera, mở xem trước rồi thử chuyển sang camera kính bằng HyperConnect trong Control Center nếu điện thoại có tùy chọn này. Camera trước/sau thường là camera điện thoại.</string>
+    <string name="open_camera">Mở camera</string>
+    <string name="close_camera">Đóng camera</string>
+    <string name="capture">Chụp ảnh kiểm tra</string>
+    <string name="confirm_glasses">Tôi xác nhận ảnh vừa chụp đúng là góc nhìn từ kính</string>
+    <string name="photo_description">Ảnh vừa chụp để đối chiếu nguồn camera</string>
+    <string name="share_photo">Gửi ảnh sang ChatGPT</string>
+    <string name="share_help">Gửi ảnh thủ công để thử khả năng đọc ảnh. Đây chưa phải luồng hỏi đáp tự động từ kính.</string>
+    <string name="audio_title">2. Micro Bluetooth</string>
+    <string name="audio_help">Chọn kính trong danh sách thiết bị đàm thoại. App ghi 3 giây rồi phát lại; chỉ nhận bản ghi khi Android báo micro Bluetooth đang được dùng.</string>
+    <string name="audio_test">Ghi 3 giây rồi phát lại</string>
+    <string name="audio_stop">Dừng kiểm tra micro</string>
+    <string name="wifi_title">3. Kênh ảnh qua Wi-Fi</string>
+    <string name="wifi_help">Nếu app Xiaomi đã kết nối Wi-Fi của kính để nhập ảnh, điền IP của kính. Phép thử chỉ đọc danh sách file, chưa thực hiện pairing hay tải ảnh tự động.</string>
+    <string name="host_hint">IP kính, ví dụ 192.168.43.1</string>
+    <string name="wifi_test">Kiểm tra danh sách ảnh</string>
+    <string name="button_title">4. Thao tác trên kính</string>
+    <string name="button_help">Để app này ở trước màn hình, thử bấm/chạm/giữ kính rồi xem có sự kiện nào xuất hiện. Không nhận được sự kiện chưa chứng minh thao tác đó không thể dùng.</string>
+    <string name="share_report">Xuất báo cáo kiểm tra</string>
+    <string name="report_help">Báo cáo gồm kết quả camera, micro, HTTP và nút bấm. Không đính kèm ảnh, bản ghi âm, MAC, mật khẩu Wi-Fi hoặc nội dung danh sách file.</string>
+    <string name="bluetooth_settings">Mở cài đặt Bluetooth</string>
+</resources>

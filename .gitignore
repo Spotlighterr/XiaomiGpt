@@ -1,0 +1,14 @@
+# Local research checkouts and temporary output
+_archive/
+.gradle/
+.kotlin/
+.idea/
+**/build/
+local.properties
+*.jks
+*.keystore
+.env
+.env.*
+!.env.example
+*.apk
+*.aab

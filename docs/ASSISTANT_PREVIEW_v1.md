@@ -6,6 +6,8 @@ Date: 2026-10-27. Target: M2442G1 firmware 1.8.12.0, Xiaomi 15 Ultra, Android 16
 
 The user confirmed that audio works with the existing probe. This does not yet establish that the new speech recognizer, ChatGPT authorization, spoken replies, or assistant activation work end to end.
 
+Update for 0.2.1: the user confirmed ChatGPT sign-in. Inference with GPT-6 Luna, without VPN/proxy, reached the old Content-Type rejection. This establishes an HTTP success status with a nonmatching header, not the exact MIME or server-body shape. Those details were not retained by 0.2.0. The new response-details action collects safe metadata so a remaining failure can be diagnosed without exporting credentials or conversation text.
+
 ## Try it
 
 1. Install the assistant-preview APK over the previous app. Open XiaomiGpt and tap **Continue with ChatGPT**. The system browser handles your credentials; XiaomiGpt does not ask for your password or an API key. Finish authorization and return to XiaomiGpt. An eligible Plus/Pro account and consent to use its plan are required; sign-in alone does not guarantee inference access.
@@ -69,3 +71,13 @@ Camera integration is deferred. The probe remains available under **Kiểm tra k
 The JVM suite covers the PKCE reference vector, callback state/path/client binding, consent denial, signed/tampered RSA ID tokens, identity claims, and successful/interrupted/failed SSE completion, plus the existing probe policies and audio-confirmation state (16 tests total). Android lint and debug assembly are required before packaging. Native ELF LOAD segments and APK zip alignment are checked for 16 KB pages on arm64-v8a and x86_64. APK signature verification is required by the packaging script.
 
 These checks do not validate Android Keystore behavior, browser round-trip/process survival, real account eligibility, Vosk accuracy, English TTS availability, Bluetooth routing, or gesture activation on the physical phone. Those are the next user-device checks, in the order given above.
+
+### 0.2.1 response handling
+
+Requests explicitly set `Accept: text/event-stream`. The reader normalizes MIME values and can recognize actual SSE from a bounded prefix if the MIME is missing or nonstandard. It does not change models, switch endpoints, add API keys, or retry automatically. SSE still must reach `response.completed` before speaking or committing a turn.
+
+Non-SSE bodies are inspected only within a 64 KiB bound for their shape and recognized error codes. JSON admission `detail` text and arbitrary error messages are not exported. HTML, arbitrary JSON, and even a completed JSON Response object are reported as incompatible with the requested streaming flow rather than treated as an answer.
+
+Use **Chi tiết lỗi / Phản hồi hội thoại** after a failed turn. The report includes HTTP status, normalized MIME, an enumerated body category, an allowlisted error code when present and a bounded request ID. It does not include response bodies, question/answer text, email, tokens, headers or authorization URLs. This diagnostic is in memory only and is cleared when the next inference request begins. OAuth failures remain outside this diagnostic.
+
+Regression tests cover MIME case/parameters, absent/mislabeled MIME with real SSE, 2xx JSON errors, quota errors, admission JSON, HTML, non-stream JSON Responses, truncated streams, streamed error codes, and cancellation. They simulate HTTP responses locally; no user's plan usage is consumed by those tests.

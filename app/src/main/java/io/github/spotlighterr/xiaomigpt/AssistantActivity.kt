@@ -5,6 +5,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.role.RoleManager
 import android.content.Intent
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.pm.PackageManager
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
@@ -81,6 +83,13 @@ class AssistantActivity : Activity() {
         button(R.id.ttsSettings).setOnClickListener { launch(Intent("com.android.settings.TTS_SETTINGS")) }
         button(R.id.manageUsage).setOnClickListener { launch(Intent(Intent.ACTION_VIEW, Uri.parse("https://chatgpt.com/settings/usage"))) }
         button(R.id.openDiagnostics).setOnClickListener { launch(Intent(this, MainActivity::class.java)) }
+        button(R.id.inferenceDetails).setOnClickListener {
+            val details = "XiaomiGpt ${BuildConfig.VERSION_NAME}\n" + (client.lastDiagnostic?.report() ?: "Chưa có phản hồi HTTP của lượt hỏi này.")
+            AlertDialog.Builder(this).setTitle("Chi tiết phản hồi hội thoại")
+                .setMessage("$details\n\nKhông kèm câu hỏi, câu trả lời, email hoặc token. Bạn có thể sao chép và gửi thông tin này để kiểm tra lỗi.")
+                .setPositiveButton("Sao chép") { _, _ -> getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("XiaomiGpt response diagnostic", details)) }
+                .setNegativeButton("Đóng", null).show()
+        }
         pendingSystemAssist = state == null && isAssist(intent)
         render()
         if (accounts.active()?.optString("access_token")?.isNotBlank() == true) loadModels()

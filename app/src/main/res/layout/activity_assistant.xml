@@ -21,6 +21,7 @@
             <Spinner android:id="@+id/assistantAudioPicker" android:layout_width="match_parent" android:layout_height="56dp" android:contentDescription="@string/assistant_audio_label" />
             <Button android:id="@+id/assistantPermissions" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_permissions" />
             <TextView android:id="@+id/assistantStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_ready_help" android:textSize="18sp" android:accessibilityLiveRegion="polite" android:layout_marginTop="12dp" />
+            <Button android:id="@+id/inferenceDetails" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/inference_details" />
             <Button android:id="@+id/talk" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/talk" />
             <Button android:id="@+id/finishSpeech" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/finish_speech" android:visibility="gone" />
             <Button android:id="@+id/stopAssistant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/stop_assistant" android:visibility="gone" />

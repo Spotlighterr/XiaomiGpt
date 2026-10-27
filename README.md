@@ -6,11 +6,13 @@ The goal is hands-free English conversations with ChatGPT, using the glasses' mi
 
 ## Current status
 
-**[v0.2.0-assistant-preview — pre-release](https://github.com/Spotlighterr/XiaomiGpt/releases/tag/v0.2.0-assistant-preview)**
+**[v0.2.1-assistant-preview — pre-release](https://github.com/Spotlighterr/XiaomiGpt/releases/tag/v0.2.1-assistant-preview)**
 
 The assistant preview implements official ChatGPT sign-in, account-specific model selection, offline English recognition with Vosk, and spoken replies through Bluetooth. It requires an eligible ChatGPT account and plan-use consent. Download the English model once (40 MB) and install an offline English Android TTS voice.
 
-The user confirmed Bluetooth audio on the target setup. The new assistant has not yet been validated end to end on the glasses or with a real ChatGPT account. Keep the app open during conversations. Android assistant-role activation and the glasses gesture need device testing. Camera access, automatic photo import and independent Xiaomi pairing are not implemented.
+The user confirmed Bluetooth audio on the target setup. The new assistant has not yet been validated end to end. Keep the app open during conversations. Android assistant-role activation and the glasses gesture need device testing. Camera access, automatic photo import and independent Xiaomi pairing are not implemented.
+
+User testing has now confirmed ChatGPT sign-in, but inference failed on GPT-6 Luna with a response-format error. v0.2.1 improves SSE compatibility and adds safe response diagnostics; successful live inference still needs confirmation.
 
 Target setup: **M2442G1 / firmware 1.8.12.0 / Xiaomi 15 Ultra / Android 16**.
 

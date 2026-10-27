@@ -13,6 +13,7 @@
     <string name="assistant_permissions">Cấp quyền / Làm mới kết nối kính</string>
     <string name="assistant_ready_help">Hoàn tất đăng nhập và kết nối kính để bắt đầu.</string>
     <string name="talk">Nói với trợ lý</string>
+    <string name="inference_details">Chi tiết lỗi / Phản hồi hội thoại</string>
     <string name="finish_speech">Tôi nói xong · Gửi ngay</string>
     <string name="stop_assistant">Dừng trợ lý</string>
     <string name="heard_question">Bạn nói</string>

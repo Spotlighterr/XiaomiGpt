@@ -14,6 +14,7 @@ class ChatGptClient(private val accounts: AccountStore) {
     private val http = OkHttpClient.Builder().followRedirects(false).followSslRedirects(false)
         .connectTimeout(20, TimeUnit.SECONDS).readTimeout(90, TimeUnit.SECONDS).callTimeout(120, TimeUnit.SECONDS).build()
     @Volatile private var inference: Call? = null
+    @Volatile var lastDiagnostic: InferenceDiagnostic? = null; private set
     data class Choice(val slug: String, val label: String) { override fun toString() = label }
 
     private fun get(url: String): JSONObject = http.newCall(Request.Builder().url(url).build()).execute().use { response ->
@@ -74,30 +75,21 @@ class ChatGptClient(private val accounts: AccountStore) {
         }
     }
     fun answer(model: String, history: List<Pair<String, String>>, question: String, active: () -> Boolean = { true }): String {
+        lastDiagnostic = null
         val input = JSONArray()
         history.takeLast(12).forEach { (role, text) -> input.put(JSONObject().put("role", role).put("content", text)) }
         input.put(JSONObject().put("role", "user").put("content", question))
         val body = JSONObject().put("model", model).put("input", input).put("store", false).put("stream", true)
             .put("instructions", "You are the voice assistant in XiaomiGpt smart glasses. Respond in English, briefly and naturally for spoken playback. Use plain text. Do not claim to see a camera or photo: no image is attached.")
         val request = Request.Builder().url("${AssistantProtocol.RESOURCE}/responses").header("Authorization", "Bearer ${activeToken()}")
+            .header("Accept", "text/event-stream")
             .post(body.toString().toRequestBody("application/json".toMediaType())).build()
         val call = http.newCall(request)
         inference = call
         try {
             check(active()) { "Đã dừng." }
             return call.execute().use { response ->
-                check(response.isSuccessful) { apiError(response.code) }
-                check(response.header("Content-Type").orEmpty().startsWith("text/event-stream")) { "OpenAI không trả về luồng hội thoại hợp lệ." }
-                val stream = ResponseStream()
-                response.body!!.charStream().buffered().use { reader ->
-                    while (true) {
-                        val line = reader.readLine() ?: break
-                        check(active() && !call.isCanceled()) { "Đã dừng." }
-                        stream.line(line)
-                        if (stream.completed) break
-                    }
-                }
-                stream.result()
+                InferenceResponse.read(response, { active() && !call.isCanceled() }) { lastDiagnostic = it }
             }
         } finally { if (inference === call) inference = null }
     }
@@ -125,7 +117,7 @@ class ChatGptClient(private val accounts: AccountStore) {
 }
 
 /** No partial answer is accepted unless the server terminates with response.completed. */
-class ResponseStream {
+class ResponseStream(private val failed: (String?) -> Unit = {}) {
     var completed = false; private set
     private val text = StringBuilder()
     private val data = StringBuilder()
@@ -138,7 +130,12 @@ class ResponseStream {
             when (event.optString("type")) {
                 "response.output_text.delta" -> text.append(event.getString("delta"))
                 "response.completed" -> completed = true
-                "response.failed", "response.incomplete", "error" -> error("OpenAI chưa hoàn tất câu trả lời. Thử lại sau.")
+                "response.failed", "response.incomplete", "error" -> {
+                    val code = event.optJSONObject("response")?.optJSONObject("error")?.optString("code")
+                        ?: event.optJSONObject("error")?.optString("code") ?: event.optString("code").takeIf { it.isNotBlank() }
+                    failed(code)
+                    error(InferenceResponse.failureMessage(200, InferenceResponse.safeCode(code), "SSE failure"))
+                }
             }
             check(text.length <= 32000) { "Câu trả lời quá dài cho chế độ giọng nói." }
         } else if (line.startsWith("data:")) {

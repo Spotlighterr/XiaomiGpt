@@ -9,17 +9,24 @@
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
     <queries>
+        <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>
         <package android:name="com.openai.chatgpt" />
         <package android:name="com.xiaomi.superhexa" />
     </queries>
     <application android:allowBackup="false" android:dataExtractionRules="@xml/data_extraction_rules"
-        android:icon="@drawable/ic_probe" android:label="XiaomiGpt Probe"
+        android:icon="@drawable/ic_probe" android:label="XiaomiGpt"
         android:supportsRtl="true" android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".AssistantActivity" android:exported="true" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+                <action android:name="android.intent.action.VOICE_COMMAND" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <provider android:name="androidx.core.content.FileProvider"

@@ -2,6 +2,8 @@
 
 Ngày: 2026-10-27.
 
+> Tài liệu lịch sử của 0.1.0. Trạng thái trợ lý mới và xác nhận âm thanh từ người dùng nằm tại [Assistant preview](ASSISTANT_PREVIEW_v1.md).
+
 ## Đã triển khai
 
 - Project Android Kotlin, min SDK 31, compile/target SDK 36.

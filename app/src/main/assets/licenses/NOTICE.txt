@@ -1,0 +1,19 @@
+XiaomiGpt includes the following speech components:
+
+Vosk Android 0.3.75 — Alpha Cephei Inc. and contributors.
+Source: https://github.com/alphacep/vosk-api
+License: Apache License 2.0, included as Vosk-Apache-2.0.txt.
+
+Java Native Access 5.18.1 — Java Native Access contributors.
+Source: https://github.com/java-native-access/jna/tree/5.18.1
+JNA offers a choice of Apache License 2.0 or LGPL 2.1 or later.
+This distribution selects Apache License 2.0. The Apache text is included
+as Vosk-Apache-2.0.txt; the upstream licensing notice is JNA-LICENSE.txt.
+
+The optional vosk-model-small-en-us-0.15 English model is downloaded directly
+from Alpha Cephei at the user's request. It is listed under Apache 2.0:
+https://alphacephei.com/vosk/models
+Its pinned SHA-256 is documented in docs/ASSISTANT_PREVIEW_v1.md.
+
+These components are used through their public APIs. No Xiaomi decompiled
+code or implementation from other smart-glasses companion apps is included.

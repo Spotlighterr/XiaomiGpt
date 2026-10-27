@@ -8,11 +8,12 @@ $apk = Join-Path $projectRoot 'app\build\outputs\apk\debug\app-debug.apk'
 if ($LASTEXITCODE -ne 0) { throw 'Generated APK signature verification failed' }
 $metadata = Get-Content (Join-Path $projectRoot 'app\build\outputs\apk\debug\output-metadata.json') -Raw | ConvertFrom-Json
 $versionName = $metadata.elements[0].versionName
-if ($versionName -notmatch '^([0-9]+\.[0-9]+\.[0-9]+)-probe$') { throw 'Unexpected probe version in APK metadata' }
+if ($versionName -notmatch '^([0-9]+\.[0-9]+\.[0-9]+)-(probe|assistant-preview)$') { throw 'Unexpected preview version in APK metadata' }
 $baseVersion = $Matches[1]
+$kind = if ($Matches[2] -eq 'probe') { 'probe' } else { 'assistant' }
 $releaseDirectory = Join-Path $projectRoot "releases\v$versionName"
 New-Item -ItemType Directory -Path $releaseDirectory -Force | Out-Null
-$apkName = "xiaomigpt-probe-v$baseVersion.apk"
+$apkName = "xiaomigpt-$kind-v$baseVersion.apk"
 $destination = Join-Path $releaseDirectory $apkName
 Copy-Item -LiteralPath $apk -Destination $destination -Force
 $digest = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()

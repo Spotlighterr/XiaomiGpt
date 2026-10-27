@@ -6,11 +6,11 @@ The goal is hands-free English conversations with ChatGPT, using the glasses' mi
 
 ## Current status
 
-**[v0.1.1-probe — pre-release](https://github.com/Spotlighterr/XiaomiGpt/releases/tag/v0.1.1-probe)**
+**[v0.2.0-assistant-preview — pre-release](https://github.com/Spotlighterr/XiaomiGpt/releases/tag/v0.2.0-assistant-preview)**
 
-This build provides a guided Bluetooth microphone test. Camera, local Wi-Fi and button diagnostics are under Advanced. It can also share a test photo with the official ChatGPT app when supported.
+The assistant preview implements official ChatGPT sign-in, account-specific model selection, offline English recognition with Vosk, and spoken replies through Bluetooth. It requires an eligible ChatGPT account and plan-use consent. Download the English model once (40 MB) and install an offline English Android TTS voice.
 
-Automatic AI conversations, ChatGPT sign-in and independent Xiaomi pairing are not implemented yet. Initial user testing found Bluetooth audio, but glasses-camera access is not working yet.
+The user confirmed Bluetooth audio on the target setup. The new assistant has not yet been validated end to end on the glasses or with a real ChatGPT account. Keep the app open during conversations. Android assistant-role activation and the glasses gesture need device testing. Camera access, automatic photo import and independent Xiaomi pairing are not implemented.
 
 Target setup: **M2442G1 / firmware 1.8.12.0 / Xiaomi 15 Ultra / Android 16**.
 
@@ -24,7 +24,9 @@ Requires JDK 17 and Android SDK 36.
 
 On Windows, use `gradlew.bat`. Build and tests pass; lint has no errors.
 
-[Testing guide](docs/PROBE_TEST_GUIDE_v2.md) · [Companion-app direction](docs/COMPANION_DIRECTION_v2_2026-10-27.md) · [Research notes](docs/RESEARCH_v1_2026-10-27.md)
+[Assistant setup and limitations](docs/ASSISTANT_PREVIEW_v1.md) · [Connection testing](docs/PROBE_TEST_GUIDE_v2.md) · [Companion-app direction](docs/COMPANION_DIRECTION_v2_2026-10-27.md)
+
+Project code is [MIT licensed](LICENSE). Third-party speech licenses are included in `app/src/main/assets/licenses/`.
 
 ## Credits
 
@@ -38,5 +40,7 @@ Thanks to these authors and communities for their research, tools and architectu
 - **morluto and REA contributors** — [REA](https://github.com/morluto/rea).
 - **macedonga** — [Visor](https://github.com/macedonga/visor).
 - **FerSaiyan** — [CyanBridge](https://github.com/FerSaiyan/Alternative-HeyCyan-App-and-SDK).
+- **Alpha Cephei and contributors** — [Vosk](https://github.com/alphacep/vosk-api) and the [English speech model](https://alphacephei.com/vosk/models).
+- **Java Native Access contributors** — [JNA](https://github.com/java-native-access/jna).
 
 These are references, not claims of endorsement. Xiaomi APKs, decompiled code, credentials and local toolchains are not included in this repository.

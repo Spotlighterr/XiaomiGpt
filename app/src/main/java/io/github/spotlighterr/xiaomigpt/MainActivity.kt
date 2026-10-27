@@ -103,6 +103,7 @@ class MainActivity : Activity() {
             override fun onSurfaceTextureUpdated(texture: SurfaceTexture) = Unit
         }
         button(R.id.refresh).setOnClickListener { requestProbePermissions() }
+        button(R.id.openAssistant).setOnClickListener { startActivity(Intent(this, AssistantActivity::class.java)) }
         button(R.id.openCamera).setOnClickListener { openCamera() }
         button(R.id.closeCamera).setOnClickListener { closeCamera() }
         button(R.id.capture).setOnClickListener { cameraProbe.capture(displayRotation()) }

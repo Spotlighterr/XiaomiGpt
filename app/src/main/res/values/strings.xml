@@ -1,7 +1,8 @@
 <resources>
     <string name="title">XiaomiGpt</string>
     <string name="subtitle">Kết nối với kính của bạn</string>
-    <string name="scope">Bản thử kết nối • Chưa có trợ lý ChatGPT</string>
+    <string name="scope">Bản thử nghiệm trợ lý • Camera kính đang phát triển</string>
+    <string name="open_assistant">Mở trợ lý ChatGPT</string>
     <string name="refresh">Làm mới kết nối</string>
     <string name="camera_title">1. Camera</string>
     <string name="camera_help">Phép thử dành cho kỹ thuật: danh sách này do Android cung cấp và thường chỉ có camera điện thoại. Chỉ đánh dấu ảnh từ kính sau khi đối chiếu đúng góc nhìn. App chưa có kết nối nhận ảnh trực tiếp từ kính.</string>

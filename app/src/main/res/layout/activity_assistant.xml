@@ -1,0 +1,41 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/assistantRoot"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_title" android:textSize="28sp" android:textStyle="bold" android:textColor="#15334D" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_intro" android:layout_marginTop="8dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/card_background" android:layout_marginTop="16dp">
+            <TextView android:id="@+id/accountStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/account_not_signed_in" android:textSize="17sp" />
+            <Button android:id="@+id/signIn" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/continue_chatgpt" />
+            <Button android:id="@+id/accountPicker" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/switch_account" />
+            <Button android:id="@+id/signOut" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/sign_out" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_model_label" />
+            <Spinner android:id="@+id/assistantModelPicker" android:layout_width="match_parent" android:layout_height="56dp" android:contentDescription="@string/assistant_model_label" />
+            <TextView android:id="@+id/planUsageStatus" android:layout_width="match_parent" android:layout_height="wrap_content" />
+            <Button android:id="@+id/manageUsage" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/manage_usage" />
+            <Button android:id="@+id/reloadModels" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/reload_models" />
+            <TextView android:id="@+id/englishModelStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+            <Button android:id="@+id/downloadEnglish" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/download_english" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/card_background" android:layout_marginTop="16dp">
+            <TextView android:id="@+id/assistantBluetoothStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="17sp" />
+            <Spinner android:id="@+id/assistantAudioPicker" android:layout_width="match_parent" android:layout_height="56dp" android:contentDescription="@string/assistant_audio_label" />
+            <Button android:id="@+id/assistantPermissions" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_permissions" />
+            <TextView android:id="@+id/assistantStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_ready_help" android:textSize="18sp" android:accessibilityLiveRegion="polite" android:layout_marginTop="12dp" />
+            <Button android:id="@+id/talk" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/talk" />
+            <Button android:id="@+id/finishSpeech" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/finish_speech" android:visibility="gone" />
+            <Button android:id="@+id/stopAssistant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/stop_assistant" android:visibility="gone" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/heard_question" android:textStyle="bold" android:layout_marginTop="12dp" />
+            <TextView android:id="@+id/transcript" android:layout_width="match_parent" android:layout_height="wrap_content" android:textIsSelectable="true" android:saveEnabled="false" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_answer" android:textStyle="bold" android:layout_marginTop="12dp" />
+            <TextView android:id="@+id/assistantAnswer" android:layout_width="match_parent" android:layout_height="wrap_content" android:textIsSelectable="true" android:saveEnabled="false" />
+            <EditText android:id="@+id/typedQuestion" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:hint="@string/typed_question_hint" android:inputType="textMultiLine|textCapSentences" android:maxLength="2000" android:importantForAutofill="no" android:saveEnabled="false" />
+            <Button android:id="@+id/sendTyped" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/send_typed" />
+            <Button android:id="@+id/newConversation" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/new_conversation" />
+        </LinearLayout>
+        <Button android:id="@+id/setDefaultAssistant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/set_default_assistant" android:layout_marginTop="16dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_activation_help" />
+        <Button android:id="@+id/ttsSettings" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/tts_settings" />
+        <Button android:id="@+id/openDiagnostics" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/open_diagnostics" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_privacy" android:layout_marginTop="12dp" />
+    </LinearLayout>
+</ScrollView>

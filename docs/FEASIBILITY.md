@@ -2,6 +2,8 @@
 
 Ngày kiểm tra: 2026-10-27. Mục tiêu: M2442G1, firmware 1.8.12.0, Xiaomi 15 Ultra, Android 16.
 
+> Tiến độ mới: người dùng đã xác nhận âm thanh hoạt động. Luồng trợ lý đăng nhập ChatGPT và xử lý giọng nói cục bộ đã được triển khai trong 0.2.0-assistant-preview, chưa xác minh hội thoại end-to-end; xem [Assistant preview](ASSISTANT_PREVIEW_v1.md). Các mục chờ bên dưới là phân tích ở thời điểm đầu, không phải toàn bộ trạng thái mã hiện tại.
+
 > Cập nhật phạm vi: người dùng yêu cầu cả camera kính và kích hoạt trực tiếp trên kính, đồng thời xác nhận tài khoản Plus hoặc Pro. Phương án chỉ mở ChatGPT Voice chưa đủ. Đang research trước triển khai; xem [RESEARCH_v1_2026-10-27.md](RESEARCH_v1_2026-10-27.md) cho các nguồn bổ sung và thứ tự kiểm chứng mới. Nội dung bên dưới giữ lại làm phân tích ban đầu.
 
 ## 1. Những gì đã xác nhận từ mi-gpt

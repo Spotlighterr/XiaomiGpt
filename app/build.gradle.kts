@@ -9,8 +9,8 @@ android {
         applicationId = "io.github.spotlighterr.xiaomigpt"
         minSdk = 31
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.1.1-probe"
+        versionCode = 3
+        versionName = "0.2.0-assistant-preview"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -24,5 +24,8 @@ dependencies {
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.exifinterface:exifinterface:1.4.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("net.java.dev.jna:jna:5.18.1@aar")
+    implementation("com.alphacephei:vosk-android:0.3.75@aar")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
 }

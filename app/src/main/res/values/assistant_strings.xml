@@ -1,0 +1,28 @@
+<resources>
+    <string name="assistant_title">Trợ lý trên kính</string>
+    <string name="assistant_intro">Đăng nhập ChatGPT, tải nhận dạng tiếng Anh một lần, rồi nói qua kính. Bản thử nghiệm này chưa dùng camera.</string>
+    <string name="account_not_signed_in">Chưa đăng nhập ChatGPT</string>
+    <string name="continue_chatgpt">Continue with ChatGPT</string>
+    <string name="switch_account">Chọn hoặc thêm tài khoản</string>
+    <string name="sign_out">Đăng xuất tài khoản đang chọn</string>
+    <string name="assistant_model_label">Model của tài khoản ChatGPT</string>
+    <string name="reload_models">Tải lại danh sách model</string>
+    <string name="manage_usage">Quản lý Usage trong ChatGPT</string>
+    <string name="download_english">Tải nhận dạng tiếng Anh · 40 MB</string>
+    <string name="assistant_audio_label">Kính Bluetooth dùng cho hội thoại</string>
+    <string name="assistant_permissions">Cấp quyền / Làm mới kết nối kính</string>
+    <string name="assistant_ready_help">Hoàn tất đăng nhập và kết nối kính để bắt đầu.</string>
+    <string name="talk">Nói với trợ lý</string>
+    <string name="finish_speech">Tôi nói xong · Gửi ngay</string>
+    <string name="stop_assistant">Dừng trợ lý</string>
+    <string name="heard_question">Bạn nói</string>
+    <string name="assistant_answer">ChatGPT trả lời</string>
+    <string name="typed_question_hint">Hoặc nhập câu hỏi tiếng Anh để kiểm tra</string>
+    <string name="send_typed">Gửi câu đã nhập</string>
+    <string name="new_conversation">Cuộc trò chuyện mới</string>
+    <string name="set_default_assistant">Đặt XiaomiGpt làm trợ lý mặc định</string>
+    <string name="assistant_activation_help">Có thể thử thao tác gọi trợ lý Android sau khi chọn mặc định. Thao tác giữ càng kính có thể vẫn gọi Xiao AI; chưa xác minh chuyển được sang XiaomiGpt. Hiện hãy giữ app mở khi nói; rời app hoặc khóa màn hình sẽ dừng phiên.</string>
+    <string name="tts_settings">Cài giọng đọc tiếng Anh</string>
+    <string name="open_diagnostics">Kiểm tra kết nối / Camera đang phát triển</string>
+    <string name="assistant_privacy">Nhận dạng giọng nói bằng Vosk trên điện thoại. Văn bản câu hỏi và ngữ cảnh được gửi tới OpenAI bằng tài khoản bạn chọn, có dùng hạn mức gói được cấp quyền. Giọng trả lời dùng bộ đọc ngoại tuyến Android. Lịch sử chỉ nằm trong bộ nhớ phiên, không xuất trong báo cáo kiểm tra.</string>
+</resources>

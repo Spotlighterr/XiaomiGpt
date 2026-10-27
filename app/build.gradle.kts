@@ -9,8 +9,8 @@ android {
         applicationId = "io.github.spotlighterr.xiaomigpt"
         minSdk = 31
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0-probe"
+        versionCode = 2
+        versionName = "0.1.1-probe"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

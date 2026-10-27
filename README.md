@@ -6,11 +6,11 @@ The goal is hands-free English conversations with ChatGPT, using the glasses' mi
 
 ## Current status
 
-**[v0.1.0-probe — pre-release](https://github.com/Spotlighterr/XiaomiGpt/releases/tag/v0.1.0-probe)**
+**[v0.1.1-probe — pre-release](https://github.com/Spotlighterr/XiaomiGpt/releases/tag/v0.1.1-probe)**
 
-This first build checks camera access, Bluetooth audio, local Wi-Fi connectivity and button events. It can also share a test photo with the official ChatGPT app.
+This build provides a guided Bluetooth microphone test. Camera, local Wi-Fi and button diagnostics are under Advanced. It can also share a test photo with the official ChatGPT app when supported.
 
-Automatic AI conversations, ChatGPT sign-in and glasses controls are not implemented yet. Compatibility with the glasses has not been verified on hardware.
+Automatic AI conversations, ChatGPT sign-in and independent Xiaomi pairing are not implemented yet. Initial user testing found Bluetooth audio, but glasses-camera access is not working yet.
 
 Target setup: **M2442G1 / firmware 1.8.12.0 / Xiaomi 15 Ultra / Android 16**.
 
@@ -24,7 +24,7 @@ Requires JDK 17 and Android SDK 36.
 
 On Windows, use `gradlew.bat`. Build and tests pass; lint has no errors.
 
-[Testing guide](docs/PROBE_TEST_GUIDE_v1.md) · [Implementation status](docs/IMPLEMENTATION_STATUS_v1.md) · [Research notes](docs/RESEARCH_v1_2026-10-27.md)
+[Testing guide](docs/PROBE_TEST_GUIDE_v2.md) · [Companion-app direction](docs/COMPANION_DIRECTION_v2_2026-10-27.md) · [Research notes](docs/RESEARCH_v1_2026-10-27.md)
 
 ## Credits
 
@@ -36,5 +36,7 @@ Thanks to these authors and communities for their research, tools and architectu
 - **jacuboffsky** — [xiaomi-glasses-network-fix](https://github.com/jacuboffsky/xiaomi-glasses-network-fix).
 - **zero2005x** — [RokidAIAssistant](https://github.com/zero2005x/RokidAIAssistant).
 - **morluto and REA contributors** — [REA](https://github.com/morluto/rea).
+- **macedonga** — [Visor](https://github.com/macedonga/visor).
+- **FerSaiyan** — [CyanBridge](https://github.com/FerSaiyan/Alternative-HeyCyan-App-and-SDK).
 
 These are references, not claims of endorsement. Xiaomi APKs, decompiled code, credentials and local toolchains are not included in this repository.

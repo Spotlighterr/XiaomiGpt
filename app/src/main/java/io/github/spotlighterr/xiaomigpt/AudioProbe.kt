@@ -25,9 +25,10 @@ class AudioProbe(context: Context) {
 
     fun devices(): List<AudioDeviceInfo> = audio.availableCommunicationDevices.filter { isHeadset(it.type) }
 
-    fun test(device: AudioDeviceInfo, update: (String) -> Unit, finished: () -> Unit) {
+    fun test(device: AudioDeviceInfo, update: (AudioProbeEvent) -> Unit, finished: () -> Unit) {
         if (!running.compareAndSet(false, true)) return
         cancelled.set(false)
+        update(AudioProbeEvent.Connecting)
         worker.execute {
             val previousMode = audio.mode
             var routeOwned = false
@@ -75,10 +76,11 @@ class AudioProbe(context: Context) {
                     SystemClock.sleep(20)
                 }
                 val input = checkNotNull(activeRecorder.routedDevice)
-                update("Đã xác nhận micro Bluetooth type=${input.type}. Hãy nói tiếng Anh trong 3 giây…")
+                update(AudioProbeEvent.Recording(input.type))
                 val pcm = ByteArrayOutputStream()
                 val deadline = SystemClock.elapsedRealtime() + 3000
                 var peak = 0
+                var nextLevelUpdate = 0L
                 while (SystemClock.elapsedRealtime() < deadline) {
                     checkActive()
                     check(audio.communicationDevice?.id == device.id && activeRecorder.routedDevice?.id == input.id) { "Đường micro thay đổi; hủy bản ghi." }
@@ -86,9 +88,15 @@ class AudioProbe(context: Context) {
                     check(count >= 0) { "Lỗi đọc micro: $count" }
                     if (count > 0) {
                         pcm.write(chunk, 0, count)
+                        var chunkPeak = 0
                         for (offset in 0 until count - 1 step 2) {
                             val sample = ((chunk[offset].toInt() and 255) or (chunk[offset + 1].toInt() shl 8)).toShort().toInt()
                             peak = maxOf(peak, kotlin.math.abs(sample))
+                            chunkPeak = maxOf(chunkPeak, kotlin.math.abs(sample))
+                        }
+                        if (SystemClock.elapsedRealtime() >= nextLevelUpdate) {
+                            update(AudioProbeEvent.Level(chunkPeak))
+                            nextLevelUpdate = SystemClock.elapsedRealtime() + 150
                         }
                     } else SystemClock.sleep(10)
                 }
@@ -103,7 +111,7 @@ class AudioProbe(context: Context) {
                 check(activePlayer.state == AudioTrack.STATE_INITIALIZED) { "Không khởi tạo được phát lại." }
                 check(activePlayer.setPreferredDevice(device)) { "Không chọn được loa Bluetooth." }
                 check(activePlayer.write(bytes, 0, bytes.size) == bytes.size) { "Không nạp đủ bản ghi để phát lại." }
-                update("Đang phát lại bản ghi. Peak=$peak/32768. Hãy nghe xem tiếng có ra từ kính không.")
+                update(AudioProbeEvent.Playback(peak))
                 activePlayer.play()
                 val playbackDeadline = SystemClock.elapsedRealtime() + 6000
                 while (activePlayer.playbackHeadPosition < bytes.size / 2) {
@@ -114,9 +122,9 @@ class AudioProbe(context: Context) {
                 }
                 val output = activePlayer.routedDevice
                 check(output != null && isHeadset(output.type)) { "Không xác nhận được đường phát Bluetooth." }
-                update("Hoàn tất: micro Bluetooth type=${input.type}, đầu ra Bluetooth type=${output.type}, peak=$peak/32768. Cần bạn xác nhận âm thanh thực sự từ kính; chưa kiểm tra nhận dạng giọng nói.")
+                update(AudioProbeEvent.Completed(input.type, output.type, peak))
             } catch (error: Exception) {
-                update(if (cancelled.get()) "Đã dừng kiểm tra âm thanh." else "Kiểm tra chưa đạt: ${error.message}")
+                update(if (cancelled.get()) AudioProbeEvent.Cancelled else AudioProbeEvent.Failed(error.message.orEmpty()))
             } finally {
                 runCatching { recorder?.stop() }; recorder?.release()
                 runCatching { player?.stop() }; player?.release()

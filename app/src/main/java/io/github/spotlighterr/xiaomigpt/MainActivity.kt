@@ -26,6 +26,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -54,6 +55,10 @@ class MainActivity : Activity() {
     private var photoTime: String? = null
     private var cameraOutcome = "Chưa thử camera."
     private var audioOutcome = "Chưa thử micro."
+    private var audioCheck = AudioCheckState()
+    private var audioUiStatus = "Chưa kiểm tra micro. Bluetooth kết nối được chưa có nghĩa micro đã hoạt động."
+    private var audioCheckTime: String? = null
+    private var pendingAudio = false
     private var wifiOutcome = "Chưa thử HTTP."
     private var audioBusy = false
     private var wifiBusy = false
@@ -107,12 +112,30 @@ class MainActivity : Activity() {
         button(R.id.bluetoothSettings).setOnClickListener { launch(Intent(Settings.ACTION_BLUETOOTH_SETTINGS)) }
         button(R.id.shareReport).setOnClickListener { shareReport() }
         button(R.id.sharePhoto).setOnClickListener { sharePhoto() }
+        button(R.id.advancedToggle).setOnClickListener {
+            val panel = findViewById<View>(R.id.advancedPanel)
+            val show = panel.visibility != View.VISIBLE
+            if (!show) closeCamera()
+            panel.visibility = if (show) View.VISIBLE else View.GONE
+            button(R.id.advancedToggle).setText(if (show) R.string.advanced_hide else R.string.advanced_show)
+        }
+        findViewById<CheckBox>(R.id.heardPlayback).setOnCheckedChangeListener { _, heard ->
+            audioCheck = audioCheck.confirmHeard(heard)
+        }
         findViewById<CheckBox>(R.id.confirmGlasses).setOnCheckedChangeListener { _, checked ->
             if (checked && !ProbePolicy.canConfirmPhoto(photoSource, activeCamera)) {
                 findViewById<CheckBox>(R.id.confirmGlasses).isChecked = false
             }
+            updateCameraSummary()
         }
         if (savedInstanceState != null) {
+            if (savedInstanceState.getBoolean("audioVerified")) {
+                audioCheck = AudioCheckState(AudioCheckState.Phase.COMPLETED,
+                    savedInstanceState.getInt("audioPeak"), savedInstanceState.getBoolean("heardPlayback"))
+                audioOutcome = savedInstanceState.getString("audioOutcome") ?: audioOutcome
+                audioUiStatus = savedInstanceState.getString("audioUiStatus") ?: audioUiStatus
+                audioCheckTime = savedInstanceState.getString("audioCheckTime")
+            }
             photoSource = savedInstanceState.getString("photoSource")
             photoTime = savedInstanceState.getString("photoTime")
             savedInstanceState.getString("photoName")?.let { name ->
@@ -123,6 +146,12 @@ class MainActivity : Activity() {
                 }
             }
         }
+        renderAudioCheck()
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        renderAudioCheck()
     }
 
     override fun onResume() {
@@ -131,6 +160,10 @@ class MainActivity : Activity() {
         refresh()
         cameraManager.registerAvailabilityCallback(cameraAvailability, main)
         audioManager.registerAudioDeviceCallback(audioAvailability, main)
+        if (pendingAudio && checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            pendingAudio = false
+            testAudio()
+        }
     }
 
     override fun onPause() {
@@ -158,11 +191,17 @@ class MainActivity : Activity() {
         outState.putString("photoName", photoFile?.name)
         outState.putString("photoSource", photoSource)
         outState.putString("photoTime", photoTime)
+        outState.putBoolean("audioVerified", audioCheck.routeVerified)
+        outState.putInt("audioPeak", audioCheck.peak)
+        outState.putBoolean("heardPlayback", audioCheck.heardPlayback)
+        outState.putString("audioOutcome", audioOutcome)
+        outState.putString("audioUiStatus", audioUiStatus)
+        outState.putString("audioCheckTime", audioCheckTime)
         super.onSaveInstanceState(outState)
     }
 
     private fun requestProbePermissions() {
-        val missing = listOf(Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH_CONNECT)
+        val missing = listOf(Manifest.permission.BLUETOOTH_CONNECT)
             .filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
         if (missing.isNotEmpty()) requestPermissions(missing.toTypedArray(), 1) else refresh()
     }
@@ -170,6 +209,11 @@ class MainActivity : Activity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         refresh()
+        if (requestCode == 3 && pendingAudio) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                if (foreground) { pendingAudio = false; testAudio() }
+            } else pendingAudio = false
+        }
         if (grantResults.any { it != PackageManager.PERMISSION_GRANTED }) {
             Toast.makeText(this, "Một số quyền chưa được cấp. Bạn có thể bật trong Cài đặt ứng dụng.", Toast.LENGTH_LONG).show()
         }
@@ -180,6 +224,7 @@ class MainActivity : Activity() {
             "App Xiaomi: ${versionOf("com.xiaomi.superhexa")}\nChatGPT: ${versionOf("com.openai.chatgpt")}")
         if (activeCamera == null) refreshCameras()
         if (!audioBusy) refreshAudio()
+        updateCameraSummary()
     }
 
     private fun refreshCameras() {
@@ -196,23 +241,31 @@ class MainActivity : Activity() {
 
     private fun refreshAudio() {
         if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            text(R.id.audioStatus, "Chưa cấp quyền Bluetooth. Bấm Cấp quyền và làm mới.")
+            text(R.id.connectionStatus, "Cần quyền Bluetooth để tìm kết nối âm thanh.")
+            text(R.id.audioStatus, "Bấm Làm mới kết nối và cho phép truy cập thiết bị ở gần.")
             button(R.id.audioTest).isEnabled = false
             return
         }
         try {
             val selected = audioDevices.getOrNull(audioPicker.selectedItemPosition)?.id
             audioDevices = audioProbe.devices()
-            val names = audioDevices.map { "${it.productName} · type=${it.type}" }
+            val names = audioDevices.map { it.productName.toString() }
             audioPicker.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, names)
             val index = audioDevices.indexOfFirst { it.id == selected }
             if (index >= 0) audioPicker.setSelection(index)
+            audioPicker.visibility = if (audioDevices.size > 1) View.VISIBLE else View.GONE
             val paired = getSystemService(BluetoothManager::class.java)?.adapter?.bondedDevices?.size ?: 0
-            text(R.id.audioStatus, "$paired thiết bị đã ghép đôi; ${audioDevices.size} đường đàm thoại Bluetooth khả dụng.\n" +
-                if (audioDevices.isEmpty()) "Kết nối kính và bật âm thanh cuộc gọi trong cài đặt Bluetooth rồi làm mới." else audioOutcome)
+            text(R.id.connectionStatus, when (audioDevices.size) {
+                0 -> "Chưa thấy kết nối âm thanh của kính."
+                1 -> "Âm thanh Bluetooth sẵn sàng\n${audioDevices[0].productName}"
+                else -> "Có ${audioDevices.size} thiết bị âm thanh. Chọn kính ở phần micro bên dưới."
+            })
+            text(R.id.audioStatus, audioUiStatus)
+            text(R.id.audioTechnical, "$paired paired devices; ${audioDevices.size} Bluetooth communication routes.\n$audioOutcome")
             button(R.id.audioTest).isEnabled = audioDevices.isNotEmpty()
         } catch (error: Exception) {
-            text(R.id.audioStatus, "Không đọc được Bluetooth: ${error.javaClass.simpleName}")
+            text(R.id.connectionStatus, "Chưa đọc được trạng thái Bluetooth. Thử Làm mới kết nối.")
+            text(R.id.audioTechnical, "Bluetooth: ${error.javaClass.simpleName}")
             button(R.id.audioTest).isEnabled = false
         }
     }
@@ -265,15 +318,55 @@ class MainActivity : Activity() {
     private fun testAudio() {
         if (audioBusy) return
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            pendingAudio = true
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 3); return
         }
         val device = audioDevices.getOrNull(audioPicker.selectedItemPosition) ?: return
         audioBusy = true
+        audioCheckTime = Instant.now().toString()
+        audioPicker.isEnabled = false
+        button(R.id.audioStop).visibility = View.VISIBLE
         button(R.id.audioTest).isEnabled = false
-        audioProbe.test(device, { outcome -> onUi {
-            audioOutcome = outcome
-            text(R.id.audioStatus, outcome)
-        } }, { onUi { audioBusy = false; if (foreground) refreshAudio() } })
+        audioProbe.test(device, { event -> onUi { handleAudioEvent(event) } }, { onUi {
+            audioBusy = false
+            audioPicker.isEnabled = true
+            button(R.id.audioStop).visibility = View.GONE
+            if (foreground) refreshAudio()
+        } })
+    }
+
+    private fun handleAudioEvent(event: AudioProbeEvent) {
+        audioCheck = audioCheck.on(event)
+        if (event is AudioProbeEvent.Completed && !audioCheck.routeVerified) return
+        when (event) {
+            AudioProbeEvent.Connecting -> { audioUiStatus = "Đang chuẩn bị micro của thiết bị…"; audioOutcome = "Connecting" }
+            is AudioProbeEvent.Recording -> { audioUiStatus = "Nói ngay: Hello XiaomiGpt. Đang thu trong 3 giây…"; audioOutcome = "Input Bluetooth type=${event.inputType}" }
+            is AudioProbeEvent.Level -> Unit
+            is AudioProbeEvent.Playback -> { audioUiStatus = "Đang phát lại. Bạn có nghe câu vừa nói qua kính không?"; audioOutcome += "; peak=${event.peak}" }
+            is AudioProbeEvent.Completed -> {
+                audioUiStatus = "Điện thoại đã dùng micro và đầu ra Bluetooth. Nếu nghe rõ câu vừa nói từ kính, đánh dấu xác nhận bên dưới."
+                audioOutcome = "Verified Bluetooth input type=${event.inputType}; output type=${event.outputType}; peak=${event.peak}/32768"
+            }
+            is AudioProbeEvent.Failed -> { audioUiStatus = "Chưa hoàn tất phép thử. Kiểm tra kết nối và âm thanh cuộc gọi của kính, rồi thử lại."; audioOutcome = event.reason }
+            AudioProbeEvent.Cancelled -> { audioUiStatus = "Đã dừng. Bạn có thể thử lại khi sẵn sàng."; audioOutcome = "Cancelled" }
+        }
+        renderAudioCheck()
+    }
+
+    private fun renderAudioCheck() {
+        text(R.id.audioStatus, audioUiStatus)
+        text(R.id.audioTechnical, audioOutcome)
+        findViewById<ProgressBar>(R.id.audioLevel).progress = (audioCheck.peak * 100 / 32768).coerceIn(0, 100)
+        findViewById<CheckBox>(R.id.heardPlayback).apply {
+            isEnabled = audioCheck.routeVerified
+            isChecked = audioCheck.heardPlayback
+        }
+    }
+
+    private fun updateCameraSummary() {
+        val confirmed = findViewById<CheckBox>(R.id.confirmGlasses).isChecked &&
+            ProbePolicy.canConfirmPhoto(photoSource, activeCamera)
+        text(R.id.cameraSummary, if (confirmed) "Bạn đã xác nhận ảnh từ kính trong lần thử này." else "Chưa truy cập được camera kính.")
     }
 
     private fun testWifi() {
@@ -344,6 +437,7 @@ class MainActivity : Activity() {
             appendLine("Photo: ${if (photoFile != null) "captured; source Camera2 id=$photoSource; time=$photoTime" else "not captured"}")
             appendLine("User visually confirmed glasses photo: $confirmed (not automatic hardware identification)")
             appendLine("Audio: $audioOutcome")
+            appendLine("Audio check time: $audioCheckTime; route verified: ${audioCheck.routeVerified}; user heard playback through glasses: ${audioCheck.heardPlayback}")
             appendLine("HTTP: $wifiOutcome")
             appendLine("Keys received while foreground (origin not identified):")
             keyEvents.forEach { appendLine(it) }

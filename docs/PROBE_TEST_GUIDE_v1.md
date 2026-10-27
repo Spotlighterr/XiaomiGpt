@@ -1,5 +1,7 @@
 # XiaomiGpt Probe 0.1.0 — hướng dẫn thử trên thiết bị
 
+> Bản hướng dẫn lịch sử. Xem [hướng dẫn 0.1.1](PROBE_TEST_GUIDE_v2.md) cho cách thử đơn giản hơn. Đính chính: HyperConnect không phải nút luôn có trong Control Center; Xiaomi chỉ mô tả camera liên thiết bị trong các cuộc gọi/livestream được hỗ trợ. Chưa xác minh app Camera2 này được hỗ trợ; không cần tìm nút đó để thử micro.
+
 Bản này dùng để quyết định đường kết nối cho app chính. Chưa thay Xiao AI, chưa có đăng nhập hay hội thoại ChatGPT tự động.
 
 ## Cài và mở

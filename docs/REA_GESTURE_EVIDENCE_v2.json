@@ -1,0 +1,28 @@
+{
+    "date":  "2026-10-27",
+    "input_sha256":  "8757e57eb498071daccf4ff09b98be8072a2cc5c2f293a638605887c1a89d7a8",
+    "input_authenticity":  "unverified; prior APK v3 integrity check failed",
+    "execution":  "static only; APK not installed or executed; no command sent to glasses",
+    "rea_version":  "6.7.0",
+    "jadx_mcp_version":  "0.7.1",
+    "records":  [
+                    {
+                        "file":  "_archive/rea/evidence/gesture-setting-viewmodel-v2.json",
+                        "sha256":  "489c109d0bf64ea34eb3bd2cd363f0334fa2e61cb1b22dbdfd1f568ddf57c046",
+                        "evidence_id":  "ev_f5ca3e1a6f1c598c1ba1d45e065e359c40c99d70364b8ff39a963b09e4900263",
+                        "operation":  "inspect_android_class",
+                        "class_name":  "com.superhexa.supervision.feature.miwearglasses.presentation.setting.subpages.gestureControl.GestureSettingViewModel",
+                        "method_name":  null,
+                        "representation":  "class inventory"
+                    },
+                    {
+                        "file":  "_archive/rea/evidence/gesture-setting-a1-v2.json",
+                        "sha256":  "d5c7e1d9aba1aaac750355930d61c86659f1c9f3d62575ec72ff95b7d677db36",
+                        "evidence_id":  "ev_40e37278ea8bfa7ae87e3fd09f7d569cc15c80d2946b4142eb0d7f078deaa99c",
+                        "operation":  "inspect_android_method",
+                        "class_name":  "com.superhexa.supervision.feature.miwearglasses.presentation.setting.subpages.gestureControl.GestureSettingViewModel",
+                        "method_name":  "a1",
+                        "representation":  "smali fallback; Java body unavailable"
+                    }
+                ]
+}

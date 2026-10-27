@@ -16,6 +16,8 @@ Screen-off/locked conversations, camera access, automatic photo import and indep
 
 **Release gate:** further releases are on hold until holding the button on the user's glasses is confirmed to invoke XiaomiGpt and complete a voice turn through the glasses. v0.3.0 provides an Android activation route for testing; it has not yet passed that hardware check.
 
+Unreleased development: [Android assistant setup fixes and diagnostics](docs/ASSISTANT_SETUP_DEV_v1.md). The user reports the setup/test buttons do not open anything on the target phone; HyperOS selection and glasses invocation remain unresolved.
+
 Target setup: **M2442G1 / firmware 1.8.12.0 / Xiaomi 15 Ultra / Android 16**.
 
 ## Build

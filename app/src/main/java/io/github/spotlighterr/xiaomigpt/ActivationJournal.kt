@@ -8,7 +8,8 @@ import java.time.Instant
 /** Bounded, local event metadata only. An Android event does not identify a physical button. */
 class ActivationJournal(context: Context) {
     private val preferences = context.getSharedPreferences("activation-events", Context.MODE_PRIVATE)
-    enum class Kind { SYSTEM_SESSION, APP_TEST_SESSION, ASSIST_INTENT, VOICE_COMMAND_INTENT, FOREGROUND_KEY, SESSION_OPEN_FAILED }
+    enum class Kind { SYSTEM_SESSION, APP_TEST_SESSION, ASSIST_INTENT, VOICE_COMMAND_INTENT, FOREGROUND_KEY, SESSION_OPEN_FAILED,
+        ROLE_REQUESTED, ROLE_RESULT, SETTINGS_ROUTE, SERVICE_TEST_RESULT, SERVICE_TEST_TIMEOUT }
     fun record(kind: Kind, number: Int = 0) = synchronized(lock) {
         val old = runCatching { JSONArray(preferences.getString("events", "[]")) }.getOrDefault(JSONArray())
         val events = JSONArray()

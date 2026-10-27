@@ -37,10 +37,12 @@
         </LinearLayout>
         <Button android:id="@+id/setDefaultAssistant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/set_default_assistant" android:layout_marginTop="16dp" />
         <TextView android:id="@+id/activationStatus" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <Button android:id="@+id/assistantSettings" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_settings" />
         <Button android:id="@+id/testSystemAssistant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/test_system_assistant" />
         <Button android:id="@+id/activationDetails" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/activation_details" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_activation_help" />
         <Button android:id="@+id/ttsSettings" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/tts_settings" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/tts_settings_help" />
         <Button android:id="@+id/openDiagnostics" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/open_diagnostics" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_privacy" android:layout_marginTop="12dp" />
     </LinearLayout>

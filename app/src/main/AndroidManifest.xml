@@ -18,7 +18,7 @@
         android:supportsRtl="true" android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity android:name=".MainActivity" android:exported="false" />
-        <activity android:name=".AssistantActivity" android:exported="true" android:launchMode="singleTop">
+        <activity android:name=".AssistantActivity" android:exported="true" android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -29,6 +29,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <service android:name=".GlassesVoiceService" android:label="XiaomiGpt" android:exported="true"
+            android:process=":assistant_system" android:permission="android.permission.BIND_VOICE_INTERACTION">
+            <intent-filter><action android:name="android.service.voice.VoiceInteractionService" /></intent-filter>
+            <meta-data android:name="android.voice_interaction" android:resource="@xml/voice_interaction" />
+        </service>
+        <service android:name=".GlassesSessionService" android:exported="true" android:permission="android.permission.BIND_VOICE_INTERACTION" />
+        <service android:name=".LocalRecognitionPlaceholder" android:exported="false" android:permission="android.permission.BIND_SPEECH_RECOGNITION" />
         <provider android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files" android:exported="false"
             android:grantUriPermissions="true">

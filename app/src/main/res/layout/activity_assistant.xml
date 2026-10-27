@@ -14,6 +14,8 @@
             <Button android:id="@+id/manageUsage" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/manage_usage" />
             <Button android:id="@+id/reloadModels" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/reload_models" />
             <TextView android:id="@+id/englishModelStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/speech_language" />
+            <Spinner android:id="@+id/languagePicker" android:layout_width="match_parent" android:layout_height="56dp" android:contentDescription="@string/speech_language" />
             <Button android:id="@+id/downloadEnglish" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/download_english" />
         </LinearLayout>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/card_background" android:layout_marginTop="16dp">
@@ -34,6 +36,9 @@
             <Button android:id="@+id/newConversation" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/new_conversation" />
         </LinearLayout>
         <Button android:id="@+id/setDefaultAssistant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/set_default_assistant" android:layout_marginTop="16dp" />
+        <TextView android:id="@+id/activationStatus" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <Button android:id="@+id/testSystemAssistant" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/test_system_assistant" />
+        <Button android:id="@+id/activationDetails" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/activation_details" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_activation_help" />
         <Button android:id="@+id/ttsSettings" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/tts_settings" />
         <Button android:id="@+id/openDiagnostics" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/open_diagnostics" />

@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.role.RoleManager
 import android.content.Intent
+import android.content.ComponentName
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.pm.PackageManager
@@ -12,10 +13,13 @@ import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.provider.Settings
+import android.service.voice.VoiceInteractionService
 import android.view.KeyEvent
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
@@ -28,7 +32,11 @@ class AssistantActivity : Activity() {
     private lateinit var accounts: AccountStore
     private lateinit var client: ChatGptClient
     private lateinit var signIn: BrowserSignIn
-    private lateinit var english: EnglishModel
+    private lateinit var speechModels: Map<SpeechLanguage, SpeechModel>
+    private var language = SpeechLanguage.VIETNAMESE
+    private val preferences by lazy { getSharedPreferences("assistant-preferences", MODE_PRIVATE) }
+    private val activations by lazy { ActivationJournal(this) }
+    private val activationGate = ActivationGate()
     private lateinit var voice: VoiceAssistant
     private val worker = Executors.newSingleThreadExecutor()
     private var devices = emptyList<AudioDeviceInfo>()
@@ -51,7 +59,9 @@ class AssistantActivity : Activity() {
         try {
             accounts = AccountStore(this); accounts.host()
             client = ChatGptClient(accounts); signIn = BrowserSignIn(accounts, client)
-            english = EnglishModel(this); voice = VoiceAssistant(this, english, client)
+            language = SpeechLanguage.fromTag(preferences.getString("language", null))
+            speechModels = SpeechLanguage.entries.associateWith { SpeechModel(this, it) }
+            voice = VoiceAssistant(this, client)
         } catch (_: Exception) {
             status("Không mở được kho đăng nhập an toàn. Không thể khởi động trợ lý; hãy thử mở lại app.")
             return
@@ -61,6 +71,20 @@ class AssistantActivity : Activity() {
         button(R.id.signOut).setOnClickListener { logout() }
         button(R.id.reloadModels).setOnClickListener { loadModels() }
         button(R.id.downloadEnglish).setOnClickListener { downloadEnglish() }
+        val languagePicker = findViewById<Spinner>(R.id.languagePicker)
+        languagePicker.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, SpeechLanguage.entries)
+        languagePicker.setSelection(language.ordinal)
+        languagePicker.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val next = SpeechLanguage.entries[position]
+                if (next != language && !voiceBusy && !setupBusy) {
+                    language = next; preferences.edit().putString("language", next.tag).apply()
+                    voice.clearHistory(); text(R.id.transcript, ""); text(R.id.assistantAnswer, "")
+                    status("Đã chọn ${next.label}. Tải nhận dạng nếu chưa có và cài giọng đọc cùng ngôn ngữ."); render()
+                }
+            }
+        }
         button(R.id.assistantPermissions).setOnClickListener { permissions(false) }
         button(R.id.talk).setOnClickListener { beginTalk(null) }
         button(R.id.finishSpeech).setOnClickListener { if (voice.listening) voice.finishSpeech() }
@@ -83,6 +107,19 @@ class AssistantActivity : Activity() {
         button(R.id.ttsSettings).setOnClickListener { launch(Intent("com.android.settings.TTS_SETTINGS")) }
         button(R.id.manageUsage).setOnClickListener { launch(Intent(Intent.ACTION_VIEW, Uri.parse("https://chatgpt.com/settings/usage"))) }
         button(R.id.openDiagnostics).setOnClickListener { launch(Intent(this, MainActivity::class.java)) }
+        button(R.id.testSystemAssistant).setOnClickListener {
+            if (!nativeAssistantActive()) { status("Chọn XiaomiGpt làm trợ lý mặc định trước. Nếu đã chọn ở bản cũ, mở cài đặt trợ lý và chọn lại XiaomiGpt."); return@setOnClickListener }
+            try {
+                startService(Intent(this, GlassesVoiceService::class.java).setAction(GlassesVoiceService.ACTION_TEST))
+                status("Đã gửi lệnh thử qua dịch vụ trợ lý Android. Chờ phiên trợ lý mở…")
+            } catch (_: Exception) { status("Android chưa mở được dịch vụ trợ lý. Mở cài đặt trợ lý và chọn lại XiaomiGpt.") }
+        }
+        button(R.id.activationDetails).setOnClickListener {
+            val report = activations.report()
+            AlertDialog.Builder(this).setTitle("Nhật ký gọi trợ lý").setMessage(report)
+                .setPositiveButton("Sao chép") { _, _ -> getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("XiaomiGpt activation", report)) }
+                .setNeutralButton("Xóa nhật ký") { _, _ -> activations.clear() }.setNegativeButton("Đóng", null).show()
+        }
         button(R.id.inferenceDetails).setOnClickListener {
             val details = "XiaomiGpt ${BuildConfig.VERSION_NAME}\n" + (client.lastDiagnostic?.report() ?: "Chưa có phản hồi HTTP của lượt hỏi này.")
             AlertDialog.Builder(this).setTitle("Chi tiết phản hồi hội thoại")
@@ -91,15 +128,29 @@ class AssistantActivity : Activity() {
                 .setNegativeButton("Đóng", null).show()
         }
         pendingSystemAssist = state == null && isAssist(intent)
+        if (pendingSystemAssist) { recordIntent(intent); activationGate.accept(SystemClock.elapsedRealtime()) }
         render()
         if (accounts.active()?.optString("access_token")?.isNotBlank() == true) loadModels()
     }
-    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); pendingSystemAssist = isAssist(intent) }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent); setIntent(intent)
+        if (isAssist(intent)) {
+            recordIntent(intent)
+            if (activationGate.accept(SystemClock.elapsedRealtime())) {
+                if (voiceBusy) { pendingSystemAssist = false; if (voice.listening) voice.finishSpeech() else voice.cancel() }
+                else pendingSystemAssist = true
+            }
+        }
+    }
+    private fun recordIntent(intent: Intent) {
+        activations.record(if (intent.action == Intent.ACTION_VOICE_COMMAND) ActivationJournal.Kind.VOICE_COMMAND_INTENT else ActivationJournal.Kind.ASSIST_INTENT)
+    }
     private fun isAssist(intent: Intent) = intent.action == Intent.ACTION_ASSIST || intent.action == Intent.ACTION_VOICE_COMMAND
     override fun onResume() {
         super.onResume(); foreground = true
         if (!::voice.isInitialized) return
         refreshDevices()
+        renderActivationStatus()
         if (pendingTalk) { pendingTalk = false; beginTalk(null) }
         consumeSystemAssist()
         showPlanWelcome()
@@ -179,11 +230,12 @@ class AssistantActivity : Activity() {
         }
     }
     private fun downloadEnglish() {
+        val speech = speechModels.getValue(language)
         setupBusy = true; render()
         worker.execute {
             var last = -1
-            val result = runCatching { english.install({ alive }) { percent -> if (percent != last) { last = percent; ui { status("Đang tải nhận dạng tiếng Anh: $percent%") } } } }
-            ui { setupBusy = false; status(if (result.isSuccess) "Nhận dạng tiếng Anh đã sẵn sàng trên điện thoại." else "Chưa cài được model tiếng Anh. Kiểm tra mạng, dung lượng trống rồi thử lại."); render() }
+            val result = runCatching { speech.install({ alive }) { percent -> if (percent != last) { last = percent; ui { status("Đang tải nhận dạng ${speech.language.label}: $percent%") } } } }
+            ui { setupBusy = false; status(if (result.isSuccess) "Nhận dạng ${speech.language.label} đã sẵn sàng trên điện thoại." else "Chưa cài được model ${speech.language.label}. Kiểm tra mạng, dung lượng trống rồi thử lại."); render() }
         }
     }
     private fun beginTalk(typed: String?) {
@@ -195,9 +247,11 @@ class AssistantActivity : Activity() {
         if (device == null) { status("Kết nối kính Bluetooth trước khi hỏi trợ lý."); return }
         val choice = choices.getOrNull(findViewById<Spinner>(R.id.assistantModelPicker).selectedItemPosition)
         if (choice == null) { status("Đăng nhập và tải danh sách model trước."); return }
-        if (typed == null && !english.ready()) { status("Bấm Tải nhận dạng tiếng Anh trước khi nói."); return }
+        val speech = speechModels.getValue(language)
+        if (typed == null && !speech.ready()) { status("Bấm Tải nhận dạng ${language.label} trước khi nói."); return }
+        preferences.edit().putString("model.${accounts.active()?.optString("client_id")}", choice.slug).apply()
         voiceBusy = true; text(R.id.transcript, typed.orEmpty()); text(R.id.assistantAnswer, ""); status("Đang chuẩn bị kính…"); render()
-        voice.start(device, choice.slug, typed, { message -> ui { status(message); button(R.id.finishSpeech).isEnabled = voice.listening } }, { question -> ui { text(R.id.transcript, question) } },
+        voice.start(device, choice.slug, typed, speech, { message -> ui { status(message); button(R.id.finishSpeech).isEnabled = voice.listening } }, { question -> ui { text(R.id.transcript, question) } },
             { reply -> ui { text(R.id.assistantAnswer, reply) } }, { ui { voiceBusy = false; render(); refreshDevices() } })
     }
     private fun consumeSystemAssist() {
@@ -211,20 +265,28 @@ class AssistantActivity : Activity() {
         val account = accounts.active()
         text(R.id.accountStatus, account?.let { "${it.optString("email", "ChatGPT")}\n${if (it.optString("access_token").isBlank()) "Cần đăng nhập lại" else "Tài khoản đã đăng nhập"}" } ?: "Chưa đăng nhập ChatGPT")
         text(R.id.planUsageStatus, if (account?.optString("scope")?.split(' ')?.contains(AssistantProtocol.DIRECT_SCOPE) == true) "Using ChatGPT plan · Dùng hạn mức gói ChatGPT của bạn" else "Chưa cấp quyền dùng gói ChatGPT")
-        text(R.id.englishModelStatus, if (english.ready()) "Nhận dạng tiếng Anh: đã cài" else "Nhận dạng tiếng Anh: chưa cài · tải một lần 40 MB")
+        val speech = speechModels.getValue(language)
+        val sizeMb = (language.modelBytes + 500_000) / 1_000_000
+        text(R.id.englishModelStatus, if (speech.ready()) "Nhận dạng ${language.label}: đã cài" else "Nhận dạng ${language.label}: chưa cài · tải một lần $sizeMb MB")
+        button(R.id.downloadEnglish).text = "Tải nhận dạng ${language.label} · $sizeMb MB"
         val picker = findViewById<Spinner>(R.id.assistantModelPicker)
-        val selected = choices.getOrNull(picker.selectedItemPosition)?.slug
+        val selected = (picker.selectedItem as? ChatGptClient.Choice)?.slug ?: preferences.getString("model.${account?.optString("client_id")}", null)
         picker.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, choices)
         choices.indexOfFirst { it.slug == selected }.takeIf { it >= 0 }?.let { picker.setSelection(it) }
         val idle = !setupBusy && !voiceBusy
-        listOf(R.id.signIn, R.id.accountPicker, R.id.reloadModels, R.id.talk, R.id.sendTyped, R.id.newConversation, R.id.assistantPermissions, R.id.setDefaultAssistant, R.id.ttsSettings, R.id.openDiagnostics).forEach { button(it).isEnabled = idle }
+        listOf(R.id.signIn, R.id.accountPicker, R.id.reloadModels, R.id.talk, R.id.sendTyped, R.id.newConversation, R.id.assistantPermissions, R.id.setDefaultAssistant, R.id.ttsSettings, R.id.openDiagnostics, R.id.testSystemAssistant).forEach { button(it).isEnabled = idle }
         button(R.id.signOut).isEnabled = idle && account?.optString("access_token")?.isNotBlank() == true
-        button(R.id.downloadEnglish).isEnabled = idle && !english.ready()
-        button(R.id.downloadEnglish).visibility = if (english.ready()) View.GONE else View.VISIBLE
+        button(R.id.downloadEnglish).isEnabled = idle && !speech.ready()
+        button(R.id.downloadEnglish).visibility = if (speech.ready()) View.GONE else View.VISIBLE
+        findViewById<Spinner>(R.id.languagePicker).isEnabled = idle
         picker.isEnabled = idle; findViewById<Spinner>(R.id.assistantAudioPicker).isEnabled = idle
         button(R.id.stopAssistant).visibility = if (voiceBusy || signingIn) View.VISIBLE else View.GONE
         button(R.id.finishSpeech).visibility = if (voiceBusy) View.VISIBLE else View.GONE
         button(R.id.finishSpeech).isEnabled = voice.listening
+    }
+    private fun nativeAssistantActive() = VoiceInteractionService.isActiveService(this, ComponentName(this, GlassesVoiceService::class.java))
+    private fun renderActivationStatus() {
+        text(R.id.activationStatus, if (nativeAssistantActive()) "Dịch vụ trợ lý XiaomiGpt: đang được Android chọn. Có thể thử gọi từ kính khi điện thoại đã mở khóa." else "Chưa chọn dịch vụ trợ lý XiaomiGpt. Bấm Đặt làm trợ lý mặc định; nếu đã chọn ở bản cũ, hãy chọn lại trong cài đặt Android.")
     }
     private fun showPlanWelcome() {
         if (!foreground || accounts.planWelcomeSeen() || accounts.active()?.optString("scope")?.split(' ')?.contains(AssistantProtocol.DIRECT_SCOPE) != true) return
@@ -234,9 +296,18 @@ class AssistantActivity : Activity() {
             .setPositiveButton("Đã hiểu", null).show()
     }
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val diagnosticKeys = setOf(KeyEvent.KEYCODE_HEADSETHOOK, KeyEvent.KEYCODE_VOICE_ASSIST, KeyEvent.KEYCODE_ASSIST,
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_MEDIA_PLAY, KeyEvent.KEYCODE_MEDIA_PAUSE,
+            KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.KEYCODE_VOLUME_UP,
+            KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_CAMERA)
+        if (event.keyCode in diagnosticKeys && event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+            activations.record(ActivationJournal.Kind.FOREGROUND_KEY, event.keyCode)
+        }
         if (::voice.isInitialized && event.keyCode in setOf(KeyEvent.KEYCODE_HEADSETHOOK, KeyEvent.KEYCODE_VOICE_ASSIST, KeyEvent.KEYCODE_ASSIST)) {
             if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
-                if (voiceBusy) { if (voice.listening) voice.finishSpeech() else voice.cancel() } else beginTalk(null)
+                if (activationGate.accept(SystemClock.elapsedRealtime())) {
+                    if (voiceBusy) { if (voice.listening) voice.finishSpeech() else voice.cancel() } else beginTalk(null)
+                }
             }
             return true
         }

@@ -74,13 +74,13 @@ class ChatGptClient(private val accounts: AccountStore) {
                 .also { check(it.isNotEmpty()) { "Tài khoản chưa có model khả dụng cho XiaomiGpt." } }
         }
     }
-    fun answer(model: String, history: List<Pair<String, String>>, question: String, active: () -> Boolean = { true }): String {
+    fun answer(model: String, history: List<Pair<String, String>>, question: String, language: SpeechLanguage = SpeechLanguage.VIETNAMESE, active: () -> Boolean = { true }): String {
         lastDiagnostic = null
         val input = JSONArray()
         history.takeLast(12).forEach { (role, text) -> input.put(JSONObject().put("role", role).put("content", text)) }
         input.put(JSONObject().put("role", "user").put("content", question))
         val body = JSONObject().put("model", model).put("input", input).put("store", false).put("stream", true)
-            .put("instructions", "You are the voice assistant in XiaomiGpt smart glasses. Respond in English, briefly and naturally for spoken playback. Use plain text. Do not claim to see a camera or photo: no image is attached.")
+            .put("instructions", language.instructions())
         val request = Request.Builder().url("${AssistantProtocol.RESOURCE}/responses").header("Authorization", "Bearer ${activeToken()}")
             .header("Accept", "text/event-stream")
             .post(body.toString().toRequestBody("application/json".toMediaType())).build()

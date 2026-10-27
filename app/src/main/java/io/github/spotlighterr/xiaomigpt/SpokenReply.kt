@@ -9,7 +9,6 @@ import android.os.SystemClock
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import java.io.File
-import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -18,16 +17,17 @@ class SpokenReply(private val context: Context) {
     private val initialized = CountDownLatch(1)
     @Volatile private var initStatus = TextToSpeech.ERROR
     private val tts = TextToSpeech(context.applicationContext) { status -> initStatus = status; initialized.countDown() }
-    fun speak(text: String, device: AudioDeviceInfo, active: () -> Boolean, routed: () -> Boolean) {
+    fun speak(text: String, device: AudioDeviceInfo, language: SpeechLanguage, active: () -> Boolean, routed: () -> Boolean) {
         val waitUntil = SystemClock.elapsedRealtime() + 15_000
         while (!initialized.await(100, TimeUnit.MILLISECONDS)) {
-            check(active()) { "Đã dừng." }; check(SystemClock.elapsedRealtime() < waitUntil) { "Bộ đọc tiếng Anh chưa sẵn sàng." }
+            check(active()) { "Đã dừng." }; check(SystemClock.elapsedRealtime() < waitUntil) { "Bộ đọc văn bản chưa sẵn sàng." }
         }
         check(initStatus == TextToSpeech.SUCCESS) { "Điện thoại chưa có bộ đọc văn bản. Cài/bật Text-to-speech trong Cài đặt Android." }
-        check(tts.setLanguage(Locale.US) >= TextToSpeech.LANG_AVAILABLE) { "Hãy tải giọng đọc English (US) trong cài đặt Text-to-speech Android." }
+        check(tts.setLanguage(language.locale) >= TextToSpeech.LANG_AVAILABLE) { "Hãy tải giọng đọc ${language.label} trong cài đặt Text-to-speech Android." }
         // Require a local voice so reply text isn't silently sent to a second cloud service.
-        val voice = tts.voices?.firstOrNull { it.locale.language == "en" && !it.isNetworkConnectionRequired }
-        check(voice != null) { "Hãy tải giọng đọc tiếng Anh ngoại tuyến trong Text-to-speech Android." }
+        val voice = tts.voices?.filter { it.locale.language == language.locale.language && !it.isNetworkConnectionRequired }
+            ?.sortedByDescending { it.locale.toLanguageTag() == language.tag }?.firstOrNull()
+        check(voice != null) { "Hãy tải giọng đọc ${language.label} ngoại tuyến trong Text-to-speech Android." }
         tts.voice = voice
         val limit = minOf(TextToSpeech.getMaxSpeechInputLength(), 3500)
         for (part in text.chunked(limit)) {

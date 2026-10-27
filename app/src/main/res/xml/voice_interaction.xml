@@ -1,0 +1,7 @@
+<voice-interaction-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:sessionService="io.github.spotlighterr.xiaomigpt.GlassesSessionService"
+    android:recognitionService="io.github.spotlighterr.xiaomigpt.LocalRecognitionPlaceholder"
+    android:settingsActivity="io.github.spotlighterr.xiaomigpt.AssistantActivity"
+    android:supportsAssist="true"
+    android:supportsLocalInteraction="false"
+    android:supportsLaunchVoiceAssistFromKeyguard="false" />

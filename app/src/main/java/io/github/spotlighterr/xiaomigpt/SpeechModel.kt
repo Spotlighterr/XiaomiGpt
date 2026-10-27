@@ -8,19 +8,19 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
 
-class EnglishModel(context: Context) {
+class SpeechModel(context: Context, val language: SpeechLanguage) {
     private val root = File(context.noBackupFilesDir, "speech").apply { mkdirs() }
-    val directory = File(root, NAME)
+    val directory = File(root, language.modelName)
     fun ready() = File(directory, "am/final.mdl").isFile && File(directory, "conf/model.conf").isFile && File(directory, ".verified").isFile
     fun install(active: () -> Boolean, progress: (Int) -> Unit) {
         if (ready()) return
-        val zip = File(root, "english-download.zip")
-        val staging = File(root, "english-staging")
+        val zip = File(root, "${language.tag}-download.zip")
+        val staging = File(root, "${language.tag}-staging")
         staging.deleteRecursively(); staging.mkdirs()
         try {
             val http = OkHttpClient.Builder().followRedirects(false).callTimeout(10, TimeUnit.MINUTES).build()
-            http.newCall(Request.Builder().url("https://alphacephei.com/vosk/models/$NAME.zip").build()).execute().use { response ->
-                check(response.isSuccessful) { "Chưa tải được model tiếng Anh (${response.code})." }
+            http.newCall(Request.Builder().url("https://alphacephei.com/vosk/models/${language.modelName}.zip").build()).execute().use { response ->
+                check(response.isSuccessful) { "Chưa tải được model ${language.label} (${response.code})." }
                 val digest = MessageDigest.getInstance("SHA-256")
                 var total = 0L
                 response.body!!.byteStream().use { input -> zip.outputStream().use { output ->
@@ -31,18 +31,18 @@ class EnglishModel(context: Context) {
                         if (count < 0) break
                         total += count; check(total <= 50_000_000) { "Tệp model vượt kích thước dự kiến." }
                         digest.update(buffer, 0, count); output.write(buffer, 0, count)
-                        progress((total * 100 / 41_205_931).toInt().coerceAtMost(100))
+                        progress((total * 100 / language.modelBytes).toInt().coerceAtMost(100))
                     }
                 } }
                 val hash = digest.digest().joinToString("") { "%02x".format(it) }
-                check(hash == SHA256) { "Model tải về không khớp checksum. Hãy thử lại." }
+                check(hash == language.sha256) { "Model tải về không khớp checksum. Hãy thử lại." }
             }
             var expanded = 0L; var count = 0
             ZipInputStream(zip.inputStream().buffered()).use { input ->
                 while (true) {
                     check(active()) { "Đã dừng cài model." }
                     val entry = input.nextEntry ?: break
-                    check(++count <= 1000 && entry.name.startsWith("$NAME/")) { "Cấu trúc model không hợp lệ." }
+                    check(++count <= 1000 && entry.name.startsWith("${language.modelName}/")) { "Cấu trúc model không hợp lệ." }
                     val target = File(staging, entry.name)
                     check(target.canonicalPath.startsWith(staging.canonicalPath + File.separator)) { "Đường dẫn model không hợp lệ." }
                     if (entry.isDirectory) target.mkdirs() else {
@@ -61,16 +61,11 @@ class EnglishModel(context: Context) {
                     input.closeEntry()
                 }
             }
-            val unpacked = File(staging, NAME)
+            val unpacked = File(staging, language.modelName)
             check(File(unpacked, "am/final.mdl").isFile && File(unpacked, "conf/model.conf").isFile) { "Model thiếu dữ liệu." }
-            File(unpacked, ".verified").writeText(SHA256)
+            File(unpacked, ".verified").writeText(language.sha256)
             directory.deleteRecursively()
-            check(unpacked.renameTo(directory)) { "Không lưu được model tiếng Anh." }
+            check(unpacked.renameTo(directory)) { "Không lưu được model ${language.label}." }
         } finally { zip.delete(); staging.deleteRecursively() }
-    }
-    companion object {
-        const val NAME = "vosk-model-small-en-us-0.15"
-        // Pinned from the official HTTPS download on 2026-10-27.
-        const val SHA256 = "30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498"
     }
 }

@@ -2,6 +2,8 @@
 
 Date: 2026-10-27. Target: M2442G1 firmware 1.8.12.0, Xiaomi 15 Ultra, Android 16.
 
+> The initial setup below describes the English-only 0.2.x preview. The user has since confirmed a working assistant response in 0.2.1. For 0.3.0 Vietnamese setup and native Android activation, see [the activation guide](GLASSES_ACTIVATION_v1.md). The new system service replaces the old Activity-only assistant entry point; hardware gesture and locked-phone support remain separate limits.
+
 ## Confirmed device feedback
 
 The user confirmed that audio works with the existing probe. This does not yet establish that the new speech recognizer, ChatGPT authorization, spoken replies, or assistant activation work end to end.

@@ -2,17 +2,17 @@
 
 An experimental Android app written in Kotlin for Xiaomi AI Glasses.
 
-The goal is hands-free English conversations with ChatGPT, using the glasses' microphone, camera and speakers.
+The goal is hands-free Vietnamese and English conversations with ChatGPT, using the glasses' microphone, camera and speakers.
 
 ## Current status
 
-**[v0.2.1-assistant-preview — pre-release](https://github.com/Spotlighterr/XiaomiGpt/releases/tag/v0.2.1-assistant-preview)**
+**[v0.3.0-assistant-preview — pre-release](https://github.com/Spotlighterr/XiaomiGpt/releases/tag/v0.3.0-assistant-preview)**
 
-The assistant preview implements official ChatGPT sign-in, account-specific model selection, offline English recognition with Vosk, and spoken replies through Bluetooth. It requires an eligible ChatGPT account and plan-use consent. Download the English model once (40 MB) and install an offline English Android TTS voice.
+The assistant preview implements official ChatGPT sign-in, account-specific model selection, offline Vietnamese/English recognition with Vosk, and spoken replies through Bluetooth. It requires an eligible ChatGPT account and plan-use consent. Select a language, download its speech model once (Vietnamese: 34 MB; English: 41 MB), and install an offline Android TTS voice for that language.
 
-The user confirmed Bluetooth audio on the target setup. The new assistant has not yet been validated end to end. Keep the app open during conversations. Android assistant-role activation and the glasses gesture need device testing. Camera access, automatic photo import and independent Xiaomi pairing are not implemented.
+The user confirmed Bluetooth audio, ChatGPT sign-in and an assistant response on the target setup. Vietnamese speech and the new native Android assistant service still need device testing. Select XiaomiGpt as the default assistant to test system activation when the phone is unlocked. A local event log helps determine whether an invocation reaches this app. The glasses may still handle their Xiao AI gesture internally.
 
-User testing has now confirmed ChatGPT sign-in, but inference failed on GPT-6 Luna with a response-format error. v0.2.1 improves SSE compatibility and adds safe response diagnostics; successful live inference still needs confirmation.
+Screen-off/locked conversations, camera access, automatic photo import and independent Xiaomi pairing are not implemented.
 
 Target setup: **M2442G1 / firmware 1.8.12.0 / Xiaomi 15 Ultra / Android 16**.
 
@@ -26,7 +26,7 @@ Requires JDK 17 and Android SDK 36.
 
 On Windows, use `gradlew.bat`. Build and tests pass; lint has no errors.
 
-[Assistant setup and limitations](docs/ASSISTANT_PREVIEW_v1.md) · [Connection testing](docs/PROBE_TEST_GUIDE_v2.md) · [Companion-app direction](docs/COMPANION_DIRECTION_v2_2026-10-27.md)
+[Vietnamese and glasses activation](docs/GLASSES_ACTIVATION_v1.md) · [Assistant setup and limitations](docs/ASSISTANT_PREVIEW_v1.md) · [Connection testing](docs/PROBE_TEST_GUIDE_v2.md)
 
 Project code is [MIT licensed](LICENSE). Third-party speech licenses are included in `app/src/main/assets/licenses/`.
 

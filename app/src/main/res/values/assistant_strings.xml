@@ -22,13 +22,13 @@
     <string name="typed_question_hint">Hoặc nhập câu hỏi để kiểm tra</string>
     <string name="send_typed">Gửi câu đã nhập</string>
     <string name="new_conversation">Cuộc trò chuyện mới</string>
-    <string name="set_default_assistant">Đặt XiaomiGpt làm trợ lý mặc định</string>
+    <string name="set_default_assistant">Chọn trợ lý mặc định trong Cài đặt</string>
     <string name="assistant_activation_help">1. Chọn XiaomiGpt làm trợ lý mặc định. 2. Thử gọi qua Android. 3. Về màn hình chính điện thoại và thử thao tác gọi trợ lý trên kính. Nếu vẫn là Xiao AI, mở Nhật ký gọi trợ lý để kiểm tra có sự kiện tới app không. Hãy thử khi điện thoại đã mở khóa; rời màn hình trợ lý hoặc khóa máy vẫn dừng phiên.</string>
     <string name="test_system_assistant">Thử gọi qua trợ lý Android</string>
     <string name="activation_details">Nhật ký gọi trợ lý</string>
     <string name="tts_settings">Cài giọng đọc trên điện thoại → phát qua kính</string>
     <string name="tts_settings_help">Trang Text-to-speech của điện thoại là đúng: điện thoại tạo giọng Việt/Anh, XiaomiGpt phát âm thanh đó qua Bluetooth tới loa kính. Hãy chọn bộ đọc có giọng ngoại tuyến đúng ngôn ngữ; không cần cài giọng vào kính.</string>
-    <string name="assistant_settings">Mở cài đặt trợ lý mặc định của Android</string>
+    <string name="assistant_settings">Thử trang cài đặt giọng nói khác</string>
     <string name="open_diagnostics">Kiểm tra kết nối / Camera đang phát triển</string>
     <string name="assistant_privacy">Nhận dạng giọng nói bằng Vosk trên điện thoại. Văn bản câu hỏi và ngữ cảnh được gửi tới OpenAI bằng tài khoản bạn chọn, có dùng hạn mức gói được cấp quyền. Giọng trả lời dùng bộ đọc ngoại tuyến Android đúng ngôn ngữ đã chọn. Lịch sử chỉ nằm trong bộ nhớ phiên. Nhật ký kích hoạt chỉ giữ tối đa 12 mốc thời gian và loại sự kiện, không ghi nội dung hội thoại.</string>
 </resources>

@@ -42,9 +42,7 @@ class AssistantActivity : Activity() {
     private val activationGate = ActivationGate()
     private val main = Handler(Looper.getMainLooper())
     private var assistantProbe = AssistantProbe()
-    private var lastRoleResult: Int? = null
     private var lastSettingsRoute: Int? = null
-    private var pendingRoleCheck = false
     private var pendingSetupProblem: Triple<String, String, Boolean>? = null
     private lateinit var voice: VoiceAssistant
     private val worker = Executors.newSingleThreadExecutor()
@@ -106,8 +104,8 @@ class AssistantActivity : Activity() {
             if (question.isNotBlank()) beginTalk(question) else status("Nhập câu hỏi trước khi gửi.")
         }
         button(R.id.newConversation).setOnClickListener { voice.clearHistory(); text(R.id.transcript, ""); text(R.id.assistantAnswer, ""); status("Đã bắt đầu cuộc trò chuyện mới.") }
-        button(R.id.setDefaultAssistant).setOnClickListener { requestDefaultAssistant() }
-        button(R.id.assistantSettings).setOnClickListener { openAssistantSettings() }
+        button(R.id.setDefaultAssistant).setOnClickListener { openAssistantSettings() }
+        button(R.id.assistantSettings).setOnClickListener { openAssistantSettings(preferVoiceInput = true) }
         button(R.id.ttsSettings).setOnClickListener { launch(Intent("com.android.settings.TTS_SETTINGS")) }
         button(R.id.manageUsage).setOnClickListener { launch(Intent(Intent.ACTION_VIEW, Uri.parse("https://chatgpt.com/settings/usage"))) }
         button(R.id.openDiagnostics).setOnClickListener { launch(Intent(this, MainActivity::class.java)) }
@@ -151,7 +149,6 @@ class AssistantActivity : Activity() {
         if (!::voice.isInitialized) return
         refreshDevices()
         renderActivationStatus()
-        if (pendingRoleCheck) finishRoleCheck()
         if (pendingTalk) { pendingTalk = false; beginTalk(null) }
         consumeSystemAssist()
         showPlanWelcome()
@@ -166,53 +163,19 @@ class AssistantActivity : Activity() {
         worker.shutdown()
         super.onDestroy()
     }
-    @Suppress("DEPRECATION")
-    private fun requestDefaultAssistant() {
-        val roles = getSystemService(RoleManager::class.java)
-        val available = runCatching { roles.isRoleAvailable(RoleManager.ROLE_ASSISTANT) }.getOrNull()
-        val held = runCatching { roles.isRoleHeld(RoleManager.ROLE_ASSISTANT) }.getOrNull()
-        if (available == true && held == false) {
-            try {
-                activations.record(ActivationJournal.Kind.ROLE_REQUESTED)
-                status("Đang mở yêu cầu chọn trợ lý của Android…")
-                startActivityForResult(roles.createRequestRoleIntent(RoleManager.ROLE_ASSISTANT), ROLE_REQUEST)
-                return
-            } catch (_: Exception) { status("Yêu cầu chọn trợ lý chưa mở được; thử trang cài đặt mặc định.") }
-        }
-        openAssistantSettings()
-    }
-    @Deprecated("Framework result callback")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode != ROLE_REQUEST || !::voice.isInitialized) return
-        lastRoleResult = resultCode
-        activations.record(ActivationJournal.Kind.ROLE_RESULT, resultCode)
-        pendingRoleCheck = true
-        if (foreground) finishRoleCheck()
-    }
-    private fun finishRoleCheck() {
-        pendingRoleCheck = false
-        renderActivationStatus()
-        if (nativeAssistantActive()) {
-            status("Android đã chọn dịch vụ XiaomiGpt. Có thể bấm Thử gọi qua trợ lý Android.")
-        } else {
-            setupProblem("Android chưa chọn dịch vụ XiaomiGpt",
-                "Yêu cầu chọn trợ lý đã kết thúc nhưng dịch vụ XiaomiGpt chưa được chọn. Điều này có thể do hủy chọn, app chưa đủ điều kiện hoặc hạn chế của hệ thống; chưa xác định được trên máy này. Hãy mở cài đặt ứng dụng mặc định, tìm Trợ lý số / Digital assistant và kiểm tra có XiaomiGpt trong danh sách không.")
-        }
-    }
-    private fun openAssistantSettings() {
-        val routes = listOf(
-            Intent("android.intent.action.MANAGE_DEFAULT_APP").putExtra("android.intent.extra.ROLE_NAME", RoleManager.ROLE_ASSISTANT),
-            Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS),
-            Intent(Settings.ACTION_VOICE_INPUT_SETTINGS),
-            Intent(Settings.ACTION_SETTINGS),
-        )
-        for ((index, intent) in routes.withIndex()) {
+    private fun openAssistantSettings(preferVoiceInput: Boolean = false) {
+        // ASSISTANT is non-requestable in AOSP's role configuration. Use public
+        // Settings entry points instead of an immediately canceled role request.
+        val defaults = 0 to Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+        val voiceInput = 1 to Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)
+        val general = 2 to Intent(Settings.ACTION_SETTINGS)
+        val routes = if (preferVoiceInput) listOf(voiceInput, defaults, general) else listOf(defaults, voiceInput, general)
+        for ((index, intent) in routes) {
             try {
                 startActivity(intent)
                 lastSettingsRoute = index
-                activations.record(ActivationJournal.Kind.SETTINGS_ROUTE, index)
-                status("Đã mở cài đặt Android. Tìm Trợ lý số / Digital assistant trong Ứng dụng mặc định rồi chọn XiaomiGpt.")
+                activations.record(ActivationJournal.Kind.SETTINGS_PUBLIC_ROUTE, index)
+                status("Đã yêu cầu mở Cài đặt Android. Tìm Trợ lý số / Digital assistant trong Ứng dụng mặc định rồi chọn XiaomiGpt nếu có trong danh sách.")
                 return
             } catch (_: Exception) { /* This ROM may not expose each standard entry point. */ }
         }
@@ -265,7 +228,7 @@ class AssistantActivity : Activity() {
         val roles = getSystemService(RoleManager::class.java)
         return "Assistant setup\nRole available: ${runCatching { roles.isRoleAvailable(RoleManager.ROLE_ASSISTANT).toString() }.getOrDefault("unknown")}\n" +
             "Role held: ${runCatching { roles.isRoleHeld(RoleManager.ROLE_ASSISTANT).toString() }.getOrDefault("unknown")}\n" +
-            "Native service selected: ${nativeAssistantState()?.toString() ?: "unknown"}\nLast role result: ${lastRoleResult ?: "not observed"}\nSettings route: ${lastSettingsRoute ?: "not opened"}\nService test: ${assistantProbe.phase}"
+            "Native service selected: ${nativeAssistantState()?.toString() ?: "unknown"}\nSetup method: public Settings intents (no role request)\nPublic settings route: ${lastSettingsRoute ?: "not opened"}\nService test: ${assistantProbe.phase}"
     }
     private fun permissions(talk: Boolean) {
         val missing = listOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.RECORD_AUDIO).filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
@@ -424,5 +387,4 @@ class AssistantActivity : Activity() {
     private fun text(id: Int, value: String) { findViewById<TextView>(id).text = value }
     private fun button(id: Int): Button = findViewById(id)
     private fun ui(block: () -> Unit) { runOnUiThread { if (alive && !isDestroyed) block() } }
-    companion object { private const val ROLE_REQUEST = 20 }
 }

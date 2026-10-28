@@ -2,6 +2,8 @@
 
 2026-10-27. Target: M2442G1 / firmware 1.8.12.0, Xiaomi 15 Ultra / Android 16.
 
+Update 2026-10-28: the user reports that the assistant setup button opens no page. The earlier interpretation of a visible chooser missing XiaomiGpt was withdrawn after clarification. Public Settings entry points are being corrected in unreleased development; glasses hold-button activation remains unverified. See [current setup work](ASSISTANT_SETUP_DEV_v1.md).
+
 ## Confirmed state
 
 - The user confirmed Bluetooth audio, ChatGPT sign-in and an assistant response in the preceding builds.

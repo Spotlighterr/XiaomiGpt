@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Minimalist editorial smart-glasses silhouette -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FCFBF7"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M26,56 C26,48.5 31.5,45 38.5,45 C45.5,45 49,48.5 49,55 C49,61.5 45,65 37.5,65 C30,65 26,61.5 26,56 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FCFBF7"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M59,55 C59,48.5 62.5,45 69.5,45 C76.5,45 82,48.5 82,56 C82,61.5 78,65 70.5,65 C63,65 59,61.5 59,55 Z" />
+    <!-- Bridge -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FCFBF7"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:pathData="M49,53.5 Q54,50 59,53.5" />
+    <!-- Warm Claude-style AI spark above bridge -->
+    <path
+        android:fillColor="#FCFBF7"
+        android:pathData="M54,26 L55.8,33.2 L63,35 L55.8,36.8 L54,44 L52.2,36.8 L45,35 L52.2,33.2 Z" />
+</vector>

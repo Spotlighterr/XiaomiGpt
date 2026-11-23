@@ -33,3 +33,16 @@ Required hardware evidence on the user's M2442G1 / firmware 1.8.12.0 and Xiaomi
 State any remaining lock-screen or firmware limitations plainly. Do not claim
 that Xiao AI's internal button handling has been replaced merely because
 XiaomiGpt is selected as Android's default assistant.
+
+## Current phone correction — PO update 2026-11-23
+
+The user now uses a **Sony Xperia 1 V**, replacing the Xiaomi 15 Ultra. Apply
+the physical glasses invocation/microphone/speaker release gate above to the
+Sony phone. Do not require or assume HyperOS. The Sony Android version and
+current glasses firmware remain unverified until read from the actual device.
+Older Xiaomi 15 Ultra / Android 16 entries describe historical tests only.
+
+Authorized development integration is on `feature/xiaolink-account-integration`
+under `integrations/xiaolink/`, with Antigravity CLI contributing the Gemini
+account bridge. Keep legacy app and releases intact. Do not claim camera or
+glasses-button success from synthetic vision tests or phone-side test buttons.

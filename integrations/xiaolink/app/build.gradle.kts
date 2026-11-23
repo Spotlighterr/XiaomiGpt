@@ -20,8 +20,8 @@ android {
         minSdk = 31
         targetSdk = 37
         // CI sets these from the git tag and run number (see .github/workflows/release.yml).
-        versionCode = providers.environmentVariable("VERSION_CODE").orNull?.toInt() ?: 1
-        versionName = providers.environmentVariable("VERSION_NAME").orNull ?: "0.4.0-dev"
+        versionCode = providers.environmentVariable("VERSION_CODE").orNull?.toInt() ?: 10
+        versionName = providers.environmentVariable("VERSION_NAME").orNull ?: "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Gemini Live API key (Google AI Studio) and model, from local.properties.
